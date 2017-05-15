@@ -30,10 +30,10 @@ code (ECC) software when the loss count is expected to be small.
 
 For full documentation please read `fecal.h`.
 
-`fecal_init()` : Initialize library.
-`fecal_encoder_create()`: Create encoder object.
-`fecal_encode()`: Encode a recovery symbol.
-`fecal_free()`: Free encoder object.
++ `fecal_init()` : Initialize library.
++ `fecal_encoder_create()`: Create encoder object.
++ `fecal_encode()`: Encode a recovery symbol.
++ `fecal_free()`: Free encoder object.
 
 #### Decoder API:
 
@@ -43,13 +43,13 @@ For full documentation please read `fecal.h`.
 
 For full documentation please read `fecal.h`.
 
-`fecal_init()` : Initialize library.
-`fecal_decoder_create()`: Create a decoder object.
-`fecal_decoder_add_original()`: Add original data to the decoder.
-`fecal_decoder_add_recovery()`: Add recovery data to the decoder.
-`fecal_decode()`: Attempt to decode with what has been added so far, returning recovered data.
-`fecal_decoder_get()`: Read back original data after decode.
-`fecal_free()`: Free decoder object.
++ `fecal_init()` : Initialize library.
++ `fecal_decoder_create()`: Create a decoder object.
++ `fecal_decoder_add_original()`: Add original data to the decoder.
++ `fecal_decoder_add_recovery()`: Add recovery data to the decoder.
++ `fecal_decode()`: Attempt to decode with what has been added so far, returning recovered data.
++ `fecal_decoder_get()`: Read back original data after decode.
++ `fecal_free()`: Free decoder object.
 
 #### Benchmarks:
 
