@@ -2,7 +2,7 @@
 ## Forward Error Correction at the Application Layer in C
 
 FEC-AL is a simple, portable, fast library for Forward Error Correction.
-FEC-AL is a block codec derived from the Siamese streaming FEC library.
+FEC-AL is a block codec derived from the [Siamese](https://github.com/catid/siamese) streaming FEC library.
 From a block of input data it generates recovery symbols that can be used
 to recover lost originals.
 
@@ -143,7 +143,7 @@ Decoder(2 MB in 1000 pieces, 120 losses): Input=645.417 MB/s, Output=77.4501 MB/
 
 #### Comparisons:
 
-Comparing with `wh256`, which is Wirehair using the GF256 library instead of the old library so it runs faster:
+Comparing with `wh256`, which is [Wirehair](https://github.com/catid/wirehair) using the GF256 library instead of the old library so it runs faster:
 
 For the same data sizes and about 100 losses:
 
