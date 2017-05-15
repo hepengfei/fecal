@@ -319,7 +319,7 @@ static void BasicTest(unsigned input_count, unsigned symbol_bytes, unsigned seed
 {
     cout << "Testing performance for input_count=" << input_count << " and symbol_bytes=" << symbol_bytes << endl;
 
-    static const unsigned final_bytes = symbol_bytes - 1;
+    static const unsigned final_bytes = symbol_bytes;
 
     for (unsigned lossCount = 1; lossCount <= input_count; ++lossCount)
     {
@@ -553,7 +553,7 @@ int main(int argc, char **argv)
     t_fecal_init.EndCall();
     t_fecal_init.Print(1);
 
-    unsigned input_count = 1000;
+    unsigned input_count = 100;
 #ifdef FECAL_DEBUG
     unsigned symbol_bytes = 20;
 #else

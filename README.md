@@ -53,7 +53,7 @@ For full documentation please read `fecal.h`.
 
 #### Benchmarks:
 
-For random losses in 2 MB of data split into 1000 equal-sized 2KB pieces:
+For random losses in 2 MB of data split into 1000 equal-sized 2000 byte pieces:
 
 ```
 Encoder(2 MB in 1000 pieces, 1 losses): Input=6968.64 MB/s, Output=6.96864 MB/s, (Encode create: 7225.69 MB/s)
@@ -140,6 +140,98 @@ Decoder(2 MB in 1000 pieces, 110 losses): Input=740.198 MB/s, Output=81.4218 MB/
 Encoder(2 MB in 1000 pieces, 120 losses): Input=1485.21 MB/s, Output=178.225 MB/s, (Encode create: 7274.05 MB/s)
 Decoder(2 MB in 1000 pieces, 120 losses): Input=645.417 MB/s, Output=77.4501 MB/s, (Overhead = 0 pieces)
 ```
+
+#### Comparisons:
+
+Comparing with `wh256`, which is Wirehair using the GF256 library instead of the old library so it runs faster:
+
+For the same data sizes and about 100 losses:
+
+```
+>> wirehair_encode(N = 1000) in 2174.33 usec, 919.825 MB/s after 98.992 avg losses
+<< wirehair_decode(N = 1000) average overhead = 0.023 blocks, average reconstruct time = 1519.61 usec, 1316.13 MB/s
+```
+
+Wirehair is asymptotically O(N) in speed, but for smaller input or output data it can be beaten by other codecs.
+In this case the Fecal encoder is twice as fast as Wirehair.  Wirehair is almost twice as fast to decode,
+but it takes the same time regardless of the number of losses, so Fecal is much faster for small loss counts.
+
+For the same data sizes and about 30 losses:
+
+```
+>> wirehair_encode(N = 1000) in 2281.65 usec, 876.559 MB/s after 30.931 avg losses
+<< wirehair_decode(N = 1000) average overhead = 0.02 blocks, average reconstruct time = 1462.48 usec, 1367.54 MB/s
+```
+
+Now Wirehair is 4x slower to encode and 2x slower to decode.  There is definitely a large, useful region of operation
+where the Fecal algorithm is preferred.
+
+#### Smaller input benchmark:
+
+For random losses in 0.2 MB of data split into 100 equal-sized 2000 byte pieces:
+
+```
+Encoder(0.2 MB in 100 pieces, 1 losses): Input=5899.71 MB/s, Output=58.9971 MB/s, (Encode create: 6251.95 MB/s)
+Decoder(0.2 MB in 100 pieces, 1 losses): Input=8257.64 MB/s, Output=82.5764 MB/s, (Overhead = 0 pieces)
+
+Encoder(0.2 MB in 100 pieces, 2 losses): Input=6040.47 MB/s, Output=122.018 MB/s, (Encode create: 6680.03 MB/s)
+Decoder(0.2 MB in 100 pieces, 2 losses): Input=6572.46 MB/s, Output=131.449 MB/s, (Overhead = 0.02 pieces)
+
+Encoder(0.2 MB in 100 pieces, 3 losses): Input=5474.95 MB/s, Output=165.344 MB/s, (Encode create: 6391.82 MB/s)
+Decoder(0.2 MB in 100 pieces, 3 losses): Input=5274.26 MB/s, Output=158.228 MB/s, (Overhead = 0.02 pieces)
+
+Encoder(0.2 MB in 100 pieces, 4 losses): Input=5298.01 MB/s, Output=212.98 MB/s, (Encode create: 6504.06 MB/s)
+Decoder(0.2 MB in 100 pieces, 4 losses): Input=5055.61 MB/s, Output=202.224 MB/s, (Overhead = 0.02 pieces)
+
+Encoder(0.2 MB in 100 pieces, 5 losses): Input=5289.61 MB/s, Output=264.48 MB/s, (Encode create: 6768.19 MB/s)
+Decoder(0.2 MB in 100 pieces, 5 losses): Input=4785.83 MB/s, Output=239.292 MB/s, (Overhead = 0 pieces)
+
+Encoder(0.2 MB in 100 pieces, 6 losses): Input=4945.6 MB/s, Output=297.23 MB/s, (Encode create: 6648.94 MB/s)
+Decoder(0.2 MB in 100 pieces, 6 losses): Input=4356.35 MB/s, Output=261.381 MB/s, (Overhead = 0.0100002 pieces)
+
+Encoder(0.2 MB in 100 pieces, 7 losses): Input=4621.07 MB/s, Output=324.399 MB/s, (Encode create: 6466.21 MB/s)
+Decoder(0.2 MB in 100 pieces, 7 losses): Input=4024.95 MB/s, Output=281.747 MB/s, (Overhead = 0.02 pieces)
+
+Encoder(0.2 MB in 100 pieces, 8 losses): Input=4338.4 MB/s, Output=347.072 MB/s, (Encode create: 6287.33 MB/s)
+Decoder(0.2 MB in 100 pieces, 8 losses): Input=3762.94 MB/s, Output=301.035 MB/s, (Overhead = 0 pieces)
+
+Encoder(0.2 MB in 100 pieces, 9 losses): Input=4346.88 MB/s, Output=391.654 MB/s, (Encode create: 6548.79 MB/s)
+Decoder(0.2 MB in 100 pieces, 9 losses): Input=3592.6 MB/s, Output=323.334 MB/s, (Overhead = 0.0100002 pieces)
+
+Encoder(0.2 MB in 100 pieces, 10 losses): Input=4168.4 MB/s, Output=417.257 MB/s, (Encode create: 6553.08 MB/s)
+Decoder(0.2 MB in 100 pieces, 10 losses): Input=3413.55 MB/s, Output=341.355 MB/s, (Overhead = 0.0100002 pieces)
+```
+
+#### Comparisons:
+
+Comparing with `cm256`, which is a Cauchy Reed-Solomon erasure code library using GF256:
+
+```
+Encoder: 2000 bytes k = 100 m = 1 : 7.69775 usec, 25981.6 MBps
+Decoder: 2000 bytes k = 100 m = 1 : 15.0289 usec, 13307.7 MBps
+Encoder: 2000 bytes k = 100 m = 2 : 37.7556 usec, 5297.23 MBps
+Decoder: 2000 bytes k = 100 m = 2 : 36.2894 usec, 5511.25 MBps
+Encoder: 2000 bytes k = 100 m = 3 : 69.2797 usec, 2886.85 MBps
+Decoder: 2000 bytes k = 100 m = 3 : 43.9871 usec, 4546.78 MBps
+Encoder: 2000 bytes k = 100 m = 4 : 56.8167 usec, 3520.09 MBps
+Decoder: 2000 bytes k = 100 m = 4 : 74.4116 usec, 2687.75 MBps
+Encoder: 2000 bytes k = 100 m = 5 : 107.402 usec, 1862.16 MBps
+Decoder: 2000 bytes k = 100 m = 5 : 102.637 usec, 1948.62 MBps
+Encoder: 2000 bytes k = 100 m = 6 : 271.987 usec, 735.329 MBps
+Decoder: 2000 bytes k = 100 m = 6 : 300.945 usec, 664.573 MBps
+Encoder: 2000 bytes k = 100 m = 7 : 371.691 usec, 538.081 MBps
+Decoder: 2000 bytes k = 100 m = 7 : 336.135 usec, 594.999 MBps
+Encoder: 2000 bytes k = 100 m = 8 : 244.129 usec, 819.241 MBps
+Decoder: 2000 bytes k = 100 m = 8 : 251.093 usec, 796.517 MBps
+Encoder: 2000 bytes k = 100 m = 9 : 282.251 usec, 708.59 MBps
+Decoder: 2000 bytes k = 100 m = 9 : 282.984 usec, 706.754 MBps
+Encoder: 2000 bytes k = 100 m = 10 : 307.543 usec, 650.315 MBps
+Decoder: 2000 bytes k = 100 m = 10 : 313.775 usec, 637.4 MBps
+```
+
+Fecal is only slower for the special single loss case where `cm256` uses XOR,
+in all other cases the new library is much faster.  For 10 losses, it is 10x faster.
+Note that `cm256` is also limited to 255 inputs or outputs.
 
 #### How fecal works:
 
