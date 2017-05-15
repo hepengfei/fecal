@@ -40,7 +40,6 @@
 
 #include "FecalCommon.h"
 
-
 namespace fecal {
 
 

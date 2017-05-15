@@ -553,7 +553,7 @@ int main(int argc, char **argv)
     t_fecal_init.EndCall();
     t_fecal_init.Print(1);
 
-    unsigned input_count = 100;
+    unsigned input_count = 1000;
 #ifdef FECAL_DEBUG
     unsigned symbol_bytes = 20;
 #else

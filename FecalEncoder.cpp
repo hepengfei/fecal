@@ -51,6 +51,11 @@ void EncoderAppDataWindow::SetEncoderInput(void* const * const input_data)
 //------------------------------------------------------------------------------
 // Encoder
 
+// This optimization speeds up encoding by about 5%
+#ifdef FECAL_ADD2_OPT
+#define FECAL_ADD2_ENC_SETUP_OPT
+#endif
+
 FecalResult Encoder::Initialize(unsigned input_count, void* const * const input_data, uint64_t total_bytes)
 {
     // Validate input and set parameters
@@ -84,6 +89,31 @@ FecalResult Encoder::Initialize(unsigned input_count, void* const * const input_
     // TBD: Unroll first set of 8 lanes to avoid the extra memset above?
     // TBD: Use GetLaneSum() approach do to minimal work for small output?
 
+#ifdef FECAL_ADD2_ENC_SETUP_OPT
+    for (unsigned laneIndex = 0; laneIndex < kColumnLaneCount; ++laneIndex)
+    {
+        // Sum[0] += Data
+        XORSummer sum;
+        sum.Initialize(LaneSums[laneIndex][0].Data, symbolBytes);
+
+        const unsigned columnEnd = input_count - 1;
+
+        for (unsigned column = laneIndex; column < columnEnd; column += kColumnLaneCount)
+        {
+            const uint8_t* columnData = reinterpret_cast<const uint8_t*>(input_data[column]);
+            sum.Add(columnData);
+        }
+
+        if ((columnEnd % kColumnLaneCount) == laneIndex)
+        {
+            const uint8_t* columnData = reinterpret_cast<const uint8_t*>(input_data[columnEnd]);
+            gf256_add_mem(LaneSums[laneIndex][0].Data, columnData, Window.FinalBytes);
+        }
+
+        sum.Finalize();
+    }
+#endif
+
     // For each input column:
     for (unsigned column = 0; column < input_count; ++column)
     {
@@ -93,8 +123,10 @@ FecalResult Encoder::Initialize(unsigned input_count, void* const * const input_
         const uint8_t CX = GetColumnValue(column);
         const uint8_t CX2 = gf256_sqr(CX);
 
+#ifndef FECAL_ADD2_ENC_SETUP_OPT
         // Sum[0] += Data
         gf256_add_mem(LaneSums[laneIndex][0].Data, columnData, columnBytes);
+#endif
 
         // Sum[1] += CX * Data
         gf256_muladd_mem(LaneSums[laneIndex][1].Data, CX, columnData, columnBytes);
