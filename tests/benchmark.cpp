@@ -319,7 +319,7 @@ static void BasicTest(unsigned input_count, unsigned symbol_bytes, unsigned seed
 {
     cout << "Testing performance for input_count=" << input_count << " and symbol_bytes=" << symbol_bytes << endl;
 
-    static const unsigned final_bytes = symbol_bytes;
+    static const unsigned final_bytes = symbol_bytes - 1;
 
     for (unsigned lossCount = 1; lossCount <= input_count; ++lossCount)
     {
@@ -341,7 +341,8 @@ static void BasicTest(unsigned input_count, unsigned symbol_bytes, unsigned seed
             fecal::PCGRandom prng;
             prng.Seed(seed, lossCount * kTrials + trial);
 
-            std::vector<uint8_t> OriginalData((size_t)total_bytes);
+            std::vector<uint8_t> OriginalData((size_t)total_bytes + 1);
+            OriginalData[total_bytes] = 0xfe;
             std::vector<void*> input_data(input_count);
 
             uint8_t* data_buffer = &OriginalData[0];
@@ -501,6 +502,13 @@ static void BasicTest(unsigned input_count, unsigned symbol_bytes, unsigned seed
 
             fecal_free(encoder);
             fecal_free(decoder);
+
+            if (OriginalData[total_bytes] != 0xfe)
+            {
+                cout << "Error: Corruption after final symbol" << endl;
+                FECAL_DEBUG_BREAK;
+                return;
+            }
         }
 
         float avgRecoveryRequired = recoveryRequired / (float)kTrials;

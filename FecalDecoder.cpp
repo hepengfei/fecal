@@ -337,18 +337,24 @@ const uint8_t* Decoder::GetLaneSum(unsigned laneIndex, unsigned sumIndex)
 
     memset(sum.Data, 0, symbolBytes);
 
-    const unsigned inputCount = Window.InputCount;
+    const unsigned inputEnd = Window.InputCount - 1;
     if (sumIndex == 0)
     {
         XORSummer summer;
         summer.Initialize(sum.Data, symbolBytes);
 
         // For each input column:
-        for (unsigned column = laneIndex; column < inputCount; column += kColumnLaneCount)
+        for (unsigned column = laneIndex; column < inputEnd; column += kColumnLaneCount)
         {
             const uint8_t* data = Window.OriginalData[column].Data;
             if (data)
                 summer.Add(data);
+        }
+        if (inputEnd % kColumnLaneCount == laneIndex)
+        {
+            const uint8_t* data = Window.OriginalData[inputEnd].Data;
+            if (data)
+                gf256_add_mem(sum.Data, data, Window.FinalBytes);
         }
 
         summer.Finalize();
@@ -356,7 +362,7 @@ const uint8_t* Decoder::GetLaneSum(unsigned laneIndex, unsigned sumIndex)
     }
 
     // For each input column:
-    for (unsigned column = laneIndex; column < inputCount; column += kColumnLaneCount)
+    for (unsigned column = laneIndex; column < inputEnd; column += kColumnLaneCount)
     {
         const uint8_t* data = Window.OriginalData[column].Data;
         if (!data)
@@ -367,6 +373,18 @@ const uint8_t* Decoder::GetLaneSum(unsigned laneIndex, unsigned sumIndex)
             CX_or_CX2 = gf256_sqr(CX_or_CX2);
 
         gf256_muladd_mem(sum.Data, CX_or_CX2, data, symbolBytes);
+    }
+    if (inputEnd % kColumnLaneCount == laneIndex)
+    {
+        const uint8_t* data = Window.OriginalData[inputEnd].Data;
+        if (data)
+        {
+            uint8_t CX_or_CX2 = GetColumnValue(inputEnd);
+            if (sumIndex == 2)
+                CX_or_CX2 = gf256_sqr(CX_or_CX2);
+
+            gf256_muladd_mem(sum.Data, CX_or_CX2, data, Window.FinalBytes);
+        }
     }
 
     return sum.Data;

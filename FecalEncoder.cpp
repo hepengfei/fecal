@@ -87,25 +87,25 @@ FecalResult Encoder::Initialize(unsigned input_count, void* const * const input_
     // For each input column:
     for (unsigned column = 0; column < input_count; ++column)
     {
-        const uint8_t* data = reinterpret_cast<const uint8_t*>(input_data[column]);
+        const uint8_t* columnData = reinterpret_cast<const uint8_t*>(input_data[column]);
+        const unsigned columnBytes = Window.GetColumnBytes(column);
         const unsigned laneIndex = column % kColumnLaneCount;
-
         const uint8_t CX = GetColumnValue(column);
         const uint8_t CX2 = gf256_sqr(CX);
 
         // Sum[0] += Data
-        gf256_add_mem(LaneSums[laneIndex][0].Data, data, symbolBytes);
+        gf256_add_mem(LaneSums[laneIndex][0].Data, columnData, columnBytes);
 
         // Sum[1] += CX * Data
-        gf256_muladd_mem(LaneSums[laneIndex][1].Data, CX, data, symbolBytes);
+        gf256_muladd_mem(LaneSums[laneIndex][1].Data, CX, columnData, columnBytes);
 
         // Sum[2] += CX^2 * Data
-        gf256_muladd_mem(LaneSums[laneIndex][2].Data, CX2, data, symbolBytes);
-
-        static_assert(kColumnSumCount == 3, "Update this");
+        gf256_muladd_mem(LaneSums[laneIndex][2].Data, CX2, columnData, columnBytes);
     }
 
     return Fecal_Success;
+
+    static_assert(kColumnSumCount == 3, "Update this");
 }
 
 FecalResult Encoder::Encode(unsigned row, FecalSymbol& symbol)

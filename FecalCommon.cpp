@@ -45,7 +45,7 @@ bool AppDataWindow::SetParameters(unsigned input_count, uint64_t total_bytes)
     InputCount = input_count;
     TotalBytes = total_bytes;
 
-    SymbolBytes = static_cast<unsigned>(total_bytes / input_count);
+    SymbolBytes = static_cast<unsigned>((total_bytes + input_count - 1) / input_count);
     FinalBytes = static_cast<unsigned>(total_bytes % SymbolBytes);
     if (FinalBytes <= 0)
         FinalBytes = SymbolBytes;
