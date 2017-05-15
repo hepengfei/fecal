@@ -230,7 +230,7 @@ Decoder: 2000 bytes k = 100 m = 10 : 313.775 usec, 637.4 MBps
 ```
 
 Fecal is only slower for the special single loss case where `cm256` uses XOR,
-in all other cases the new library is much faster.  For 10 losses, it is 10x faster.
+in all other cases the new library is much faster.  For 10 losses, it is 6x faster.
 Note that `cm256` is also limited to 255 inputs or outputs.
 
 #### How fecal works:
