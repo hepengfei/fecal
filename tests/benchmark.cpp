@@ -426,11 +426,17 @@ static void BasicTest(unsigned input_count, unsigned symbol_bytes, unsigned seed
 
             for (unsigned recoveryIndex = 0;; ++recoveryIndex)
             {
+                vecptr_t data = std::make_shared< std::vector<uint8_t> >(symbol_bytes);
+                recoveryData.push_back(data);
+
                 FecalSymbol recovery;
+                recovery.Index = recoveryIndex;
+                recovery.Data = &data->at(0);
+                recovery.Bytes = symbol_bytes;
 
                 {
                     t_fecal_encode.BeginCall();
-                    int result = fecal_encode(encoder, recoveryIndex, &recovery);
+                    int result = fecal_encode(encoder, &recovery);
                     t_fecal_encode.EndCall();
 
                     if (result)
@@ -439,14 +445,6 @@ static void BasicTest(unsigned input_count, unsigned symbol_bytes, unsigned seed
                         cout << "Error: Unable to generate encoded data. error=" << result << endl;
                         return;
                     }
-
-                    // Copy data out of the encoder-provided buffer into an
-                    // application buffer we can pass to the decoder,
-                    // which will be modified to contain the decoded result.
-                    vecptr_t data = std::make_shared< std::vector<uint8_t> >(symbol_bytes);
-                    recoveryData.push_back(data);
-                    memcpy(&data->at(0), recovery.Data, symbol_bytes);
-                    recovery.Data = &data->at(0);
                 }
 
                 ++recoveryRequired;
@@ -553,11 +551,11 @@ int main(int argc, char **argv)
     t_fecal_init.EndCall();
     t_fecal_init.Print(1);
 
-    unsigned input_count = 1000;
+    unsigned input_count = 200;
 #ifdef FECAL_DEBUG
     unsigned symbol_bytes = 20;
 #else
-    unsigned symbol_bytes = 2000;
+    unsigned symbol_bytes = 1300;
 #endif
 
     if (argc >= 2)

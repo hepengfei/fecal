@@ -394,9 +394,6 @@ const uint8_t* Decoder::GetLaneSum(unsigned laneIndex, unsigned sumIndex)
 
 void Decoder::MultiplyLowerTriangle()
 {
-    // Note: This step tends to be slow because it is a dense triangular
-    // matrix-vector product
-
     const unsigned columns = static_cast<unsigned>(RecoveryMatrix.Columns.size());
     const unsigned srcBytes = Window.SymbolBytes;
 
@@ -423,9 +420,6 @@ void Decoder::MultiplyLowerTriangle()
 
 FecalResult Decoder::BackSubstitution()
 {
-    // Note: This step tends to be fast because the upper-right of the matrix
-    // while streaming is mostly zero
-
     const unsigned columns = static_cast<unsigned>(RecoveryMatrix.Columns.size());
     const unsigned srcBytes = Window.SymbolBytes;
 
@@ -543,11 +537,7 @@ bool RecoveryMatrixState::GenerateMatrix()
             const unsigned lane = column % kColumnLaneCount;
             const unsigned opcode = GetRowOpcode(lane, row);
 
-            unsigned value = 0;
-
-            // Interpret opcode to calculate matrix row element j
-            if (opcode & 1)
-                value ^= 1;
+            unsigned value = opcode & 1;
             if (opcode & 2)
                 value ^= CX;
             if (opcode & 4)
@@ -558,7 +548,6 @@ bool RecoveryMatrixState::GenerateMatrix()
                 value ^= gf256_mul(CX, RX);
             if (opcode & 32)
                 value ^= gf256_mul(CX2, RX);
-
             rowData[j] = (uint8_t)value;
         }
 

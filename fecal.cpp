@@ -83,13 +83,13 @@ FECAL_EXPORT FecalEncoder fecal_encoder_create(unsigned input_count, void* const
     return reinterpret_cast<FecalEncoder>( encoder );
 }
 
-FECAL_EXPORT int fecal_encode(FecalEncoder encoder_v, unsigned index, FecalSymbol* symbol)
+FECAL_EXPORT int fecal_encode(FecalEncoder encoder_v, FecalSymbol* symbol)
 {
     fecal::Encoder* encoder = reinterpret_cast<fecal::Encoder*>( encoder_v );
     if (!encoder || !symbol)
         return Fecal_InvalidInput;
 
-    return encoder->Encode(index, *symbol);
+    return encoder->Encode(*symbol);
 }
 
 FECAL_EXPORT void fecal_free(void* codec_v)

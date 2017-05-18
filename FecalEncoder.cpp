@@ -83,7 +83,7 @@ FecalResult Encoder::Initialize(unsigned input_count, void* const * const input_
     }
 
     // Allocate workspace
-    if (!Sum.Allocate(symbolBytes) || !Product.Allocate(symbolBytes))
+    if (!ProductWorkspace.Allocate(symbolBytes))
         return Fecal_OutOfMemory;
 
     // TBD: Unroll first set of 8 lanes to avoid the extra memset above?
@@ -140,17 +140,22 @@ FecalResult Encoder::Initialize(unsigned input_count, void* const * const input_
     static_assert(kColumnSumCount == 3, "Update this");
 }
 
-FecalResult Encoder::Encode(unsigned row, FecalSymbol& symbol)
+FecalResult Encoder::Encode(FecalSymbol& symbol)
 {
     // If encoder is not initialized:
-    if (!Product.Data)
+    if (!ProductWorkspace.Data)
+        return Fecal_InvalidInput;
+
+    const unsigned symbolBytes = Window.SymbolBytes;
+    if (symbol.Bytes != symbolBytes)
         return Fecal_InvalidInput;
 
     // Load parameters
     const unsigned count = Window.InputCount;
-    const unsigned symbolBytes = Window.SymbolBytes;
-    uint8_t* outputSum = Sum.Data;
-    uint8_t* outputProduct = Product.Data;
+    uint8_t* outputSum = reinterpret_cast<uint8_t*>( symbol.Data );
+    uint8_t* outputProduct = ProductWorkspace.Data;
+
+    const unsigned row = symbol.Index;
 
     // Initialize LDPC
     PCGRandom prng;
@@ -234,11 +239,6 @@ FecalResult Encoder::Encode(unsigned row, FecalSymbol& symbol)
 
     // Sum += RX * Product
     gf256_muladd_mem(outputSum, GetRowValue(row), outputProduct, symbolBytes);
-
-    // Output sum will be what user reads from
-    symbol.Data = outputSum;
-    symbol.Bytes = symbolBytes;
-    symbol.Index = row;
 
     return Fecal_Success;
 }

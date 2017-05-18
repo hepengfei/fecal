@@ -74,7 +74,7 @@ public:
     FecalResult Initialize(unsigned input_count, void* const * const input_data, uint64_t total_bytes);
 
     // Generate the next recovery packet for the data
-    FecalResult Encode(unsigned row, FecalSymbol& symbol);
+    FecalResult Encode(FecalSymbol& symbol);
 
 protected:
     // Application data set
@@ -84,7 +84,7 @@ protected:
     AlignedDataBuffer LaneSums[kColumnLaneCount][kColumnSumCount];
 
     // Output workspace
-    AlignedDataBuffer Sum, Product;
+    AlignedDataBuffer ProductWorkspace;
 };
 
 

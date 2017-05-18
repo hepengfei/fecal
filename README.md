@@ -2,18 +2,21 @@
 ## Forward Error Correction at the Application Layer in C
 
 FEC-AL is a simple, portable, fast library for Forward Error Correction.
-FEC-AL is a block codec derived from the [Siamese](https://github.com/catid/siamese) streaming FEC library.
-From a block of input data it generates recovery symbols that can be used
-to recover lost originals.
+From a block of equally sized original data pieces, it generates recovery
+symbols that can be used to recover lost original data.
 
 * It requires that data pieces are all a fixed size.
 * It can take as input an unlimited number of input blocks.
 * It can generate an unlimited stream of recovery symbols used for decoding.
+* It has a small (about 1%) chance of failing to recover, so it is not an MDS code.
 
 The main limitation of the software is that it gets slower as O(N^^2) in
 the number of inputs or outputs.  In trade, the encoder overhead is unusually
 low, and the decoder is extremely efficient when recovering from a small number
 of losses.  It may be the best choice based on practical evaluation.
+
+FEC-AL is a block codec derived from the [Siamese](https://github.com/catid/siamese) streaming FEC library.
+
 
 #### Why fecal matters:
 
@@ -21,6 +24,7 @@ It supports an unlimited number of inputs and outputs, similar to a Fountain Cod
 but it is designed as a Convolutional Code.  This means that it does not perform
 well with a large number of losses.  It is faster than existing error correction
 code (ECC) software when the loss count is expected to be small.
+
 
 #### Encoder API:
 
@@ -34,6 +38,7 @@ For full documentation please read `fecal.h`.
 + `fecal_encoder_create()`: Create encoder object.
 + `fecal_encode()`: Encode a recovery symbol.
 + `fecal_free()`: Free encoder object.
+
 
 #### Decoder API:
 
@@ -50,6 +55,7 @@ For full documentation please read `fecal.h`.
 + `fecal_decode()`: Attempt to decode with what has been added so far, returning recovered data.
 + `fecal_decoder_get()`: Read back original data after decode.
 + `fecal_free()`: Free decoder object.
+
 
 #### Benchmarks:
 
@@ -141,6 +147,7 @@ Encoder(2 MB in 1000 pieces, 120 losses): Input=1485.21 MB/s, Output=178.225 MB/
 Decoder(2 MB in 1000 pieces, 120 losses): Input=645.417 MB/s, Output=77.4501 MB/s, (Overhead = 0 pieces)
 ```
 
+
 #### Comparisons:
 
 Comparing with `wh256`, which is [Wirehair](https://github.com/catid/wirehair) using the GF256 library instead of the old library so it runs faster:
@@ -165,6 +172,7 @@ For the same data sizes and about 30 losses:
 
 Now Wirehair is 4x slower to encode and 2x slower to decode.  There is definitely a large, useful region of operation
 where the Fecal algorithm is preferred.
+
 
 #### Smaller input benchmark:
 
@@ -202,6 +210,7 @@ Encoder(0.2 MB in 100 pieces, 10 losses): Input=4168.4 MB/s, Output=417.257 MB/s
 Decoder(0.2 MB in 100 pieces, 10 losses): Input=3413.55 MB/s, Output=341.355 MB/s, (Overhead = 0.0100002 pieces)
 ```
 
+
 #### Comparisons:
 
 Comparing with `cm256`, which is a Cauchy Reed-Solomon erasure code library using GF256:
@@ -232,6 +241,7 @@ Decoder: 2000 bytes k = 100 m = 10 : 313.775 usec, 637.4 MBps
 Fecal is only slower for the special single loss case where `cm256` uses XOR,
 in all other cases the new library is much faster.  For 10 losses, it is 6x faster.
 Note that `cm256` is also limited to 255 inputs or outputs.
+
 
 #### How fecal works:
 
@@ -279,6 +289,7 @@ and 2.6x longer to encode.  Encoding requires a lot more simple XOR ops
 so it is still pretty fast.  Decoding is usually really quick because
 average loss rates are low, but when needed it requires a lot more
 GF multiplies requiring table lookups which is slower.
+
 
 #### Credits
 

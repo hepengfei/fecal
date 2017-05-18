@@ -35,7 +35,7 @@
 */
 
 // Library version
-#define FECAL_VERSION 1
+#define FECAL_VERSION 2
 
 // Tweak if the functions are exported or statically linked
 //#define FECAL_DLL /* Defined when building/linking as DLL */
@@ -164,11 +164,10 @@ FECAL_EXPORT FecalEncoder fecal_encoder_create(unsigned input_count, void* const
 
     Generate a recovery symbol.
 
-    encoder: Encoder from fecal_encoder_create().
-    index:   Application provided recovery symbol index starting from 0.
-    symbol:  Library provided buffer that application reads from.
-
-    Buffer data will be available until the next call to fecal_encode() or fecal_free().
+    encoder:       Encoder from fecal_encoder_create().
+    symbol->Index: Application provided recovery symbol index starting from 0.
+    symbol->Data:  Application provided buffer to write the symbol to.
+    symbol->Bytes: Application provided number of bytes in the symbol buffer.
 
     Given total_bytes and input_count from fecal_encoder_create():
 
@@ -179,7 +178,7 @@ FECAL_EXPORT FecalEncoder fecal_encoder_create(unsigned input_count, void* const
     Returns Fecal_InvalidInput if the symbol parameter was invalid, or the
         codec is not initialized yet.
 */
-FECAL_EXPORT int fecal_encode(FecalEncoder encoder, unsigned index, FecalSymbol* symbol);
+FECAL_EXPORT int fecal_encode(FecalEncoder encoder, FecalSymbol* symbol);
 
 /*
     fecal_free()
