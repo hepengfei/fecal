@@ -293,4 +293,6 @@ GF multiplies requiring table lookups which is slower.
 
 #### Credits
 
-This software was written entirely by myself ( Christopher A. Taylor mrcatid@gmail.com ), making shit happen. If you find it useful and would like to buy me a coffee, consider tipping.
+Software by Christopher A. Taylor <mrcatid@gmail.com>, making shit happen.
+
+Please reach out if you need support or would like to collaborate on a project.
