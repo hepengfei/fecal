@@ -22,7 +22,7 @@ FEC-AL is a block codec derived from the [Siamese](https://github.com/catid/siam
 
 It supports an unlimited number of inputs and outputs, similar to a Fountain Code,
 but it is designed as a Convolutional Code.  This means that it does not perform
-well with a large number of losses.  It is faster than existing error correction
+well with a large number of losses.  It is faster than existing erasure correction
 code (ECC) software when the loss count is expected to be small.
 
 
